@@ -121,9 +121,8 @@ ADD FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE ;
 
 ### 2. ANALYSIS AND SOLVING ANALYTICAL PROBLEMS RELATED TO AMAZON DATASET :
 
-**Task 1**: 
-Top Selling Products
-Query the top 10 products by total sales value.
+**Task 1 Top Selling Products Query the top 10 products by total sales value**
+
 Challenge: Include product name, total quantity sold, and total sales value.
 
 **Task 2: Revenue by Category
