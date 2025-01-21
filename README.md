@@ -1,191 +1,214 @@
-# Library Management System using SQL Project 
+# Amazon Sales Analysis using SQL Project 
 
 ## Project Overview
 
-**Project Title**: Library Management System  
-**Database**: `library_db`
+**Project Title**: Amazon Sales Analysis  
+**Database**: `Amazon_DB`
 
-This project demonstrates the implementation of a Library Management System using SQL. It includes creating and managing tables, performing CRUD operations, and executing advanced SQL queries. The goal is to showcase skills in database design, manipulation, and querying.
+This project demonstrates the implementation of Amazon Sales Analysis using SQL.This project focuses on designing and managing a comprehensive relational database system for Amazon-like e-commerce services. The implementation includes creating normalized tables, establishing relationships through primary and foreign keys, and enforcing referential integrity. Additionally, the project demonstrates advanced SQL query techniques to perform detailed analytical tasks, such as sales analysis, customer behavior studies, product profitability assessments, and operational efficiency evaluations. These exercises aim to enhance database design, manipulation, and querying expertise while solving real-world business problems through structured data insights. 
 
 ## Objectives
 
-1. **Set up the Library Management System Database**: Create and populate the database with tables for branches, employees, members, books, issued status, and return status.
-2. **CRUD Operations**: Perform Create, Read, Update, and Delete operations on the data.
-3. **CTAS (Create Table As Select)**: Utilize CTAS to create new tables based on query results.
-4. **Advanced SQL Queries**: Develop complex queries to analyze and retrieve specific data.
+1. **Efficient Database Design**: Create a normalized schema with well-defined primary and foreign key relationships for maintaining data integrity.
+2. **Data Analysis**: Perform advanced SQL queries to analyze sales trends, customer behavior, and product performance.
+3. **Operational Insights**: Generate actionable insights to monitor inventory, seller activity, and shipping performance.
+4. **Business Decision Support**: Enable informed decision-making by providing key metrics like revenue, order success rates, and payment trends.
 
 ## Project Structure
 
 ### 1. Database Setup
-![ERD](https://github.com/Parshwa1504/Library-Management-System-using-SQL-Project/blob/main/Library_Management_System%20ERD.png)
+![ERD](https://github.com/Parshwa1504/Amazon-Sales-Analysis-Using-SQL/blob/main/Amazon_ERD.png)
 
-- **Database Creation**: Created a database named `library_db`.
-- **Table Creation**: Created tables for branches, employees, members, books, issued status, and return status. Each table includes relevant columns and relationships.
+- **Database Creation**: Created a database named `Amazon_DB`.
+- **Table Creation**: Created tables for category, products, customers, order_items, sellers, shipping, payments, inventory, orders . Each table includes relevant columns and relationships.
 
 ```sql
-CREATE DATABASE library_db;
+CREATE TABLE category(
+	category_id	INT PRIMARY KEY,
+	category_name VARCHAR(25)
+); 
 
-DROP TABLE IF EXISTS branch;
-CREATE TABLE branch
-(
-            branch_id VARCHAR(10) PRIMARY KEY,
-            manager_id VARCHAR(10),
-            branch_address VARCHAR(30),
-            contact_no VARCHAR(15)
+CREATE TABLE products(
+	product_id INT PRIMARY KEY ,
+	product_name VARCHAR(50),
+	price FLOAT ,	
+	cogs FLOAT,
+	category_id INT --FK
+); 
+
+CREATE TABLE customers(
+	Customer_ID INT PRIMARY KEY,
+	first_name VARCHAR(25),	
+	last_name VARCHAR(25),
+	Customer_state VARCHAR(25),
+	address VARCHAR(25) DEFAULT ('xxxxx')
+); 
+
+CREATE TABLE order_items (
+    order_item_id INT PRIMARY KEY,
+    order_id INT, --FK
+    product_id INT, --FK
+    quantity INT,
+    price_per_unit FLOAT
 );
 
 
--- Create table "Employee"
-DROP TABLE IF EXISTS employees;
-CREATE TABLE employees
-(
-            emp_id VARCHAR(10) PRIMARY KEY,
-            emp_name VARCHAR(30),
-            position VARCHAR(30),
-            salary DECIMAL(10,2),
-            branch_id VARCHAR(10),
-            FOREIGN KEY (branch_id) REFERENCES  branch(branch_id)
-);
+CREATE TABLE sellers (
+	seller_id INT PRIMARY KEY,
+	seller_name VARCHAR(25),
+	origin VARCHAR(25)
+); 
 
+CREATE TABLE shipping(
+	shipping_id INT PRIMARY KEY,
+	order_id INT, --FK
+	shipping_date DATE,
+	return_date DATE,
+	shipping_providers VARCHAR(25),
+	delivery_status VARCHAR(25)
+); 
 
--- Create table "Members"
-DROP TABLE IF EXISTS members;
-CREATE TABLE members
-(
-            member_id VARCHAR(10) PRIMARY KEY,
-            member_name VARCHAR(30),
-            member_address VARCHAR(30),
-            reg_date DATE
-);
+CREATE TABLE payments(
+	payment_id INT PRIMARY KEY,
+	order_id INT, --FK
+	payment_date DATE,
+	payment_status VARCHAR(25)
+); 
 
+CREATE TABLE inventory(
+	inventory_id INT PRIMARY KEY,
+	product_id INT, --FK
+	stock INT,
+	warehouse_id INT,
+	last_stock_date DATE 
+); 
 
+CREATE TABLE orders(
+	order_id INT PRIMARY KEY,
+	order_date DATE,
+	customer_id INT, --FK
+	seller_id INT,--FK
+	order_status VARCHAR(25)
+); 
 
--- Create table "Books"
-DROP TABLE IF EXISTS books;
-CREATE TABLE books
-(
-            isbn VARCHAR(50) PRIMARY KEY,
-            book_title VARCHAR(80),
-            category VARCHAR(30),
-            rental_price DECIMAL(10,2),
-            status VARCHAR(10),
-            author VARCHAR(30),
-            publisher VARCHAR(30)
-);
+-- Adding FOREIGN KEY TO TABLES : 
 
+ALTER TABLE orders
+ADD FOREIGN KEY (customer_id) REFERENCES customers(Customer_ID) ON DELETE CASCADE ;
 
+ALTER TABLE orders
+ADD FOREIGN KEY (seller_id) REFERENCES sellers(seller_id) ON DELETE CASCADE ;
 
--- Create table "IssueStatus"
-DROP TABLE IF EXISTS issued_status;
-CREATE TABLE issued_status
-(
-            issued_id VARCHAR(10) PRIMARY KEY,
-            issued_member_id VARCHAR(30),
-            issued_book_name VARCHAR(80),
-            issued_date DATE,
-            issued_book_isbn VARCHAR(50),
-            issued_emp_id VARCHAR(10),
-            FOREIGN KEY (issued_member_id) REFERENCES members(member_id),
-            FOREIGN KEY (issued_emp_id) REFERENCES employees(emp_id),
-            FOREIGN KEY (issued_book_isbn) REFERENCES books(isbn) 
-);
+ALTER TABLE inventory 
+ADD FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE ;
 
+ALTER TABLE payments
+ADD FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ;
 
+ALTER TABLE shipping
+ADD FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ;
 
--- Create table "ReturnStatus"
-DROP TABLE IF EXISTS return_status;
-CREATE TABLE return_status
-(
-            return_id VARCHAR(10) PRIMARY KEY,
-            issued_id VARCHAR(30),
-            return_book_name VARCHAR(80),
-            return_date DATE,
-            return_book_isbn VARCHAR(50),
-            FOREIGN KEY (return_book_isbn) REFERENCES books(isbn)
-);
+ALTER TABLE products
+ADD FOREIGN KEY (category_id) REFERENCES category(category_id) ON DELETE CASCADE ;
+
+ALTER TABLE order_items
+ADD FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ;
+
+ALTER TABLE order_items
+ADD FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE ;
 
 ```
 
-### 2. CRUD Operations
+### 2. ANALYSIS AND SOLVING ANALYTICAL PROBLEMS RELATED TO AMAZON DATASET :
 
-- **Create**: Inserted sample records into the `books` table.
-- **Read**: Retrieved and displayed data from various tables.
-- **Update**: Updated records in the `employees` table.
-- **Delete**: Removed records from the `members` table as needed.
+**Task 1**: 
+Top Selling Products
+Query the top 10 products by total sales value.
+Challenge: Include product name, total quantity sold, and total sales value.
 
-**Task 1. Create a New Book Record**
--- "978-1-60129-456-2', 'To Kill a Mockingbird', 'Classic', 6.00, 'yes', 'Harper Lee', 'J.B. Lippincott & Co.')"
+**Task 2: Revenue by Category
+Calculate total revenue generated by each product category.
+Challenge: Include the percentage contribution of each category to total revenue.**
 
-**Task 2: Update an Existing Member's Address**
+**Task 3: Average Order Value (AOV)
+Compute the average order value for each customer.
+Challenge: Include only customers with more than 5 orders.**
 
-**Task 3: Delete a Record from the Issued Status Table**
--- Objective: Delete the record with issued_id = 'IS121' from the issued_status table.
+**Task 4: Monthly Sales Trend
+Query monthly total sales over the past year.
+Challenge: Display the sales trend, grouping by month, return current_month sale, last month sale!**
 
-**Task 4: Retrieve All Books Issued by a Specific Employee**
--- Objective: Select all books issued by the employee with emp_id = 'E101'.
+**Task 5: Customers with No Purchases
+Find customers who have registered but never placed an order.
+Challenge: List customer details and the time since their registration.**
 
-**Task 5: List Members Who Have Issued More Than One Book**
--- Objective: Use GROUP BY to find members who have issued more than one book.
+**Task 6:Least-Selling Categories by State
+Identify the least-selling product category for each state.
+Challenge: Include the total sales for that category within each state.** 
 
-### 3. CTAS (Create Table As Select)
+**Task 7:Customer Lifetime Value (CLTV)
+Calculate the total value of orders placed by each customer over their lifetime.
+Challenge: Rank customers based on their CLTV.**:
 
-- **Task 6: Create Summary Tables**: Used CTAS to generate new tables based on query results - each book and total book_issued_cnt**
+**Task 8: Inventory Stock Alerts
+Query products with stock levels below a certain threshold (e.g., less than 10 units).
+Challenge: Include last restock date and warehouse information.**:
 
-### 4. Data Analysis & Findings
+**Task 9:Shipping Delays
+Identify orders where the shipping date is later than 3 days after the order date.
+Challenge: Include customer, order details, and delivery provider.**:
 
-The following SQL queries were used to address specific questions:
+**Task 10: Payment Success Rate 
+Calculate the percentage of successful payments across all orders.
+Challenge: Include breakdowns by payment status (e.g., failed, pending).**:
 
-Task 7. **Retrieve All Books in a Specific Category**:
+**Task 11: Top Performing Sellers
+Find the top 5 sellers based on total sales value.
+Challenge: Include both successful and failed orders, and display their percentage of successful orders.**:
 
-Task 8. **Task 8: Find Total Rental Income by Category**:
+**Task 12: Product Profit Margin
+Calculate the profit margin for each product (difference between price and cost of goods sold).
+Challenge: Rank products by their profit margin, showing highest to lowest.**
 
-Task 9. **List Members Who Registered in the Last 180 Days**:
+**Task 13: Most Returned Products
+Query the top 10 products by the number of returns.
+Challenge: Display the return rate as a percentage of total units sold for each product.**  
 
-Task 10. **List Employees with Their Branch Manager's Name and their branch details**:
+**Task 14: Orders Pending Shipment
+Find orders that have been paid but are still pending shipment.
+Challenge: Include order details, payment date, and customer information.**  
 
-Task 11. **Create a Table of Books with Rental Price Above a Certain Threshold**:
+**Task 15: Inactive Sellers
+Identify sellers who haven’t made any sales in the last 6 months.
+Challenge: Show the last sale date and total sales from those sellers.**  
 
-Task 12: **Retrieve the List of Books Not Yet Returned**
+**Task 16: IDENTITY customers into returning or new
+if the customer has done more than 5 return categorize them as returning otherwise new
+Challenge: List customers id, name, total orders, total returns**  
 
-## Advanced SQL Operations
+**Task 17: Cross-Sell Opportunities
+Find customers who purchased product A but not product B (e.g., customers who bought AirPods but not AirPods Max).
+Challenge: Suggest cross-sell opportunities by displaying matching product categories.**  
 
-**Task 13: Identify Members with Overdue Books**  
-Write a query to identify members who have overdue books (assume a 30-day return period). Display the member's_id, member's name, book title, issue date, and days overdue.
+**Task 18: Top 5 Customers by Orders in Each State
+Identify the top 5 customers with the highest number of orders for each state.
+Challenge: Include the number of orders and total sales for each customer.**  
+  
+**Task 19: Revenue by Shipping Provider
+Calculate the total revenue handled by each shipping provider.
+Challenge: Include the total number of orders handled and the average delivery time for each provider.**
 
-**Task 14: Update Book Status on Return**  
-Write a query to update the status of books in the books table to "Yes" when they are returned (based on entries in the return_status table).
+**Task 20: Top 10 product with highest decreasing revenue ratio compare to last year(2022) and current_year(2023)**
 
-**Task 15: Branch Performance Report**  
-Create a query that generates a performance report for each branch, showing the number of books issued, the number of books returned, and the total revenue generated from book rentals.
+Challenge: Return product_id, product_name, category_name, 2022 revenue and 2023 revenue decrease ratio at end Round the result
+Note: Decrease ratio = cr-ls/ls* 100 (cs = current_year ls=last_year)
 
-**Task 16: CTAS: Create a Table of Active Members**  
-Use the CREATE TABLE AS (CTAS) statement to create a new table active_members containing members who have issued at least one book in the last 2 months.
+**Final Task**
 
-**Task 17: Find Employees with the Most Book Issues Processed**  
-Write a query to find the top 3 employees who have processed the most book issues. Display the employee name, number of books processed, and their branch.
-
-**Task 18: Identify Members Issuing High-Risk Books**  
-Write a query to identify members who have issued books more than twice with the status "damaged" in the books table. Display the member name, book title, and the number of times they've issued damaged books.    
-
-**Task 19: Stored Procedure**
-Objective:
-Create a stored procedure to manage the status of books in a library system.
-Description:
-Write a stored procedure that updates the status of a book in the library based on its issuance. The procedure should function as follows:
-The stored procedure should take the book_id as an input parameter.
-The procedure should first check if the book is available (status = 'yes').
-If the book is available, it should be issued, and the status in the books table should be updated to 'no'.
-If the book is not available (status = 'no'), the procedure should return an error message indicating that the book is currently not available.
-
-**Task 20: Create Table As Select (CTAS)**
-Objective: Create a CTAS (Create Table As Select) query to identify overdue books and calculate fines.
-
-## Reports
-
-- **Database Schema**: Detailed table structures and relationships.
-- **Data Analysis**: Insights into book categories, employee salaries, member registration trends, and issued books.
-- **Summary Reports**: Aggregated data on high-demand books and employee performance.
+Store Procedure
+create a function as soon as the product is sold the the same quantity should reduced from inventory table
+after adding any sales records it should update the stock in the inventory table based on the product and qty purchased
 
 ## Conclusion
 
-This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis.
+The Amazon Sales Analysis using SQL Project demonstrates effective database design and advanced SQL queries to analyze sales trends, customer behavior, and operational efficiency. It addresses challenges like inventory management, shipping delays, and profitability, providing actionable insights to support business decisions, optimize performance, and enhance e-commerce operations efficiently.
